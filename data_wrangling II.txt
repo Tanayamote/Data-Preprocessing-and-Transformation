@@ -1,0 +1,242 @@
+# 2) Detect Outliers using IQR Method
+
+# Import required libraries
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import StandardScaler
+
+
+# Create Academic Performance dataset
+
+data = {
+    'Roll_No': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    
+    'Name': [
+        'Krushna', 'Amit', 'Shahid', 'Rahul', 'Yash',
+        'Ayesha', 'Prerana', 'Amita', 'Sneha', 'Tanaya'
+    ],
+    
+    'Department': [
+        'IT', 'COMP', 'IT', np.nan, 'ENTC',
+        'COMP', 'IT', 'COMP', 'ENTC', 'IT'
+    ],
+    
+    'Marks': [
+        78, 85, 90, np.nan, 65,
+        72, 150, 80, 66, 95
+    ],
+    
+    'Age': [
+        20, 21, 19, 20, np.nan,
+        22, 21, 20, 19, 23
+    ],
+    
+    'Attendance': [
+        85, 90, 88, 76, 95,
+        np.nan, 70, 82, 91, 89
+    ]
+}
+
+
+# Convert dictionary into DataFrame
+
+df = pd.DataFrame(data)
+
+
+# Display dataset
+
+print("Academic Performance Dataset:")
+print(df)
+
+
+# Display shape of dataset
+
+print("\nShape of Dataset:")
+print(df.shape)
+
+
+# Display dataset information
+
+print("\nDataset Information:")
+print(df.info())
+
+
+# Check missing values
+
+print("\nMissing Values:")
+print(df.isnull().sum())
+
+
+# Display statistical summary
+
+print("\nStatistical Summary:")
+print(df.describe())
+
+
+# Fill missing values in Department column using mode
+
+df['Department'] = df['Department'].fillna(df['Department'].mode()[0])
+
+
+# Fill missing values in Marks column using mean
+
+df['Marks'] = df['Marks'].fillna(df['Marks'].mean())
+
+
+# Fill missing values in Age column using median
+
+df['Age'] = df['Age'].fillna(df['Age'].median())
+
+
+# Fill missing values in Attendance column using mean
+
+df['Attendance'] = df['Attendance'].fillna(df['Attendance'].mean())
+
+
+# Display dataset after handling missing values
+
+print("\nDataset After Handling Missing Values:")
+print(df)
+
+
+# Check missing values again
+
+print("\nMissing Values After Treatment:")
+print(df.isnull().sum())
+
+
+# Boxplot for outlier detection
+
+plt.figure(figsize=(8, 5))
+sns.boxplot(data=df[['Marks', 'Age', 'Attendance']])
+
+plt.title("Boxplot for Outlier Detection")
+plt.grid(True)
+
+plt.show()
+
+
+# Detect outliers using IQR method for Marks column
+
+Q1 = df['Marks'].quantile(0.25)
+Q3 = df['Marks'].quantile(0.75)
+
+IQR = Q3 - Q1
+
+lower_limit = Q1 - 1.5 * IQR
+upper_limit = Q3 + 1.5 * IQR
+
+
+# Display limits
+
+print("\nLower Limit:", lower_limit)
+print("Upper Limit:", upper_limit)
+
+
+# Detect outliers
+
+outliers = df[(df['Marks'] < lower_limit) | (df['Marks'] > upper_limit)]
+
+print("\nOutliers in Marks Column:")
+print(outliers)
+
+
+# Replace outliers using median
+
+median_marks = df['Marks'].median()
+
+df['Marks'] = np.where(
+    df['Marks'] > upper_limit,
+    median_marks,
+    df['Marks']
+)
+
+
+# Display dataset after outlier treatment
+
+print("\nDataset After Outlier Treatment:")
+print(df)
+
+
+# Plot histogram before transformation
+
+plt.figure(figsize=(7, 5))
+
+plt.hist(df['Marks'], bins=5)
+
+plt.title("Marks Distribution Before Transformation")
+plt.xlabel("Marks")
+plt.ylabel("Frequency")
+plt.grid(True)
+
+plt.show()
+
+
+# Apply logarithmic transformation
+
+df['Log_Marks'] = np.log(df['Marks'])
+
+
+# Display transformed values
+
+print("\nLog Transformed Marks:")
+print(df[['Marks', 'Log_Marks']])
+
+
+# Plot histogram after transformation
+
+plt.figure(figsize=(7, 5))
+
+plt.hist(df['Log_Marks'], bins=5)
+
+plt.title("Marks Distribution After Log Transformation")
+plt.xlabel("Log Marks")
+plt.ylabel("Frequency")
+plt.grid(True)
+
+plt.show()
+
+
+# Apply Min-Max Normalization
+
+scaler = MinMaxScaler()
+
+df[['Marks', 'Attendance']] = scaler.fit_transform(
+    df[['Marks', 'Attendance']]
+)
+
+
+# Display normalized values
+
+print("\nNormalized Dataset:")
+print(df[['Marks', 'Attendance']])
+
+
+# Apply Standardization
+
+standard_scaler = StandardScaler()
+
+scaled_data = standard_scaler.fit_transform(
+    df[['Age']]
+)
+
+
+# Convert standardized data into DataFrame
+
+scaled_df = pd.DataFrame(scaled_data, columns=['Standardized_Age'])
+
+
+# Display standardized values
+
+print("\nStandardized Age:")
+print(scaled_df)
+
+
+# Final dataset
+
+print("\nFinal Processed Dataset:")
+print(df)
